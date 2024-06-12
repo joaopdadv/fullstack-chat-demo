@@ -3,8 +3,8 @@ import "~/styles/globals.css";
 import { GeistSans } from "geist/font/sans";
 
 export const metadata = {
-  title: "Chat Demo",
-  description: "Demo de chat usando next.js e nest.js",
+  title: "Entrar",
+  description: "Entre no sistema de chat",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
@@ -15,7 +15,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="pt-br" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
+        <body>
+            <main className="flex min-h-screen flex-col items-center justify-center text-black">
+                {children}
+            </main>
+        </body>
     </html>
   );
 }
