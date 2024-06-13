@@ -1,6 +1,6 @@
-function ConversasPage() {
+async function ConversasPage() {
     return (
-        <>conversas</>
+        <>converssdwqdqwdas</>
     );
 }
 
