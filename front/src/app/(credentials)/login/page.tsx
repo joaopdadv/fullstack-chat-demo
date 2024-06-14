@@ -1,15 +1,15 @@
 'use client';
 
-import { cookies } from "next/headers";
-import { setCookie } from "cookies-next";
 import Link from "next/link";
+import { resolve } from "path";
 import { type FormEvent, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
-import { signIn } from "next-auth/react";
+import { setCookie } from "cookies-next"
 
 interface UserResponse{
   token:string,
+  expirationDate: number,
   profile:{
     id:string,
     name:string,
@@ -26,12 +26,21 @@ export default function LoginPage() {
 
     event.preventDefault()
 
-    await signIn("credentials", {
-      email:email,
-      password:password,
-      redirect:true,
-      callbackUrl:"/conversas"
-    })
+    const res = await fetch(`${process.env.PUBLIC_API_URL}/auth/login`, {
+      method: "POST",
+      headers:{
+          "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+          email,
+          password
+      })
+    });
+
+    const response = await res.json() as UserResponse;
+    response.expirationDate =  Date.now() + 4 * 60 * 60 * 1000; // 4 horas em milissegundos
+    setCookie("pdi_chat_user", response);
+    console.log(response);
   }
 
   return (
@@ -45,7 +54,7 @@ export default function LoginPage() {
           onChange={(e) => setEmail(e.target.value)} 
         />
         <Input 
-          type="password" 
+          type="password"
           placeholder="senha" 
           value={password} 
           onChange={(e) => setPassword(e.target.value)} 

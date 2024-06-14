@@ -1,7 +1,6 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
-import { NextAuthProvider } from "./Provider";
 
 export const metadata = {
   title: "Chat Demo",
@@ -17,11 +16,9 @@ export default function RootLayout({
 
   return (
     <html lang="pt-br" className={`${GeistSans.variable}`}>
-      <NextAuthProvider>
         <body>
           {children}
         </body>
-      </NextAuthProvider>
     </html>
   );
 }
