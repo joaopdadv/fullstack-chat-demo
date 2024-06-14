@@ -1,26 +1,18 @@
 'use client';
 
 import Link from "next/link";
-import { type FormEvent, useState, useEffect } from "react";
+import { type FormEvent, useState } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { setCookie } from "cookies-next"
 import { useRouter } from "next/navigation";
-import { useUserSession } from "~/utils/clientSession";
 import { type Session } from "~/types/session";
 
 export default function LoginPage() {
 
   const router = useRouter();
-  const user = useUserSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  // useEffect(() => {
-  //   if(user && user.expirationDate > Date.now()){
-  //     router.push("/conversas");
-  //   }
-  // }, [user, router])
 
   const submitForm = async (event:FormEvent) => {
 

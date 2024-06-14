@@ -2,19 +2,19 @@
 
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { getServerSession } from "next-auth";
 import Text from "./Text";
+import { getUserSession } from "~/utils/serverSession";
 
 
 async function ConversasPage() {
     
-    const session = await getServerSession();
-
-    console.log(session);
+    const user = getUserSession();
 
     return (
         <>
-            <Text></Text>
+            {user?.profile.email}
+
+                <Text></Text>
         </>
     );
 }

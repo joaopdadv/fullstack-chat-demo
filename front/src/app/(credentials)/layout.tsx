@@ -1,7 +1,5 @@
 import "~/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
-
 export const metadata = {
   title: "Entrar",
   description: "Entre no sistema de chat",
