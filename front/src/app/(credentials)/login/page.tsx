@@ -1,26 +1,26 @@
 'use client';
 
 import Link from "next/link";
-import { resolve } from "path";
-import { type FormEvent, useState } from "react";
+import { type FormEvent, useState, useEffect } from "react";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { setCookie } from "cookies-next"
-
-interface UserResponse{
-  token:string,
-  expirationDate: number,
-  profile:{
-    id:string,
-    name:string,
-    role:number,
-    email:string,
-  }
-}
+import { useRouter } from "next/navigation";
+import { useUserSession } from "~/utils/clientSession";
+import { type Session } from "~/types/session";
 
 export default function LoginPage() {
+
+  const router = useRouter();
+  const user = useUserSession();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  
+  // useEffect(() => {
+  //   if(user && user.expirationDate > Date.now()){
+  //     router.push("/conversas");
+  //   }
+  // }, [user, router])
 
   const submitForm = async (event:FormEvent) => {
 
@@ -37,10 +37,10 @@ export default function LoginPage() {
       })
     });
 
-    const response = await res.json() as UserResponse;
-    response.expirationDate =  Date.now() + 4 * 60 * 60 * 1000; // 4 horas em milissegundos
+    const response = await res.json() as Session;
+    response.expirationDate =  Date.now() + 4 * 60 * 60 * 1000; // 4 horas de validade na session
     setCookie("pdi_chat_user", response);
-    console.log(response);
+    router.push("/conversas");
   }
 
   return (
