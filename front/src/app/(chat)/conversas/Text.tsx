@@ -1,26 +1,17 @@
-"use client"
+"use server"
 
-import { useEffect, useState } from "react";
-import { type Session } from "~/types/session";
-import { useUserSession } from "~/utils/clientSession";
+import { getUserSession } from "~/utils/serverSession";
 
 
-function Text() {
-    const [user, setUser] = useState<Session | null>(null);
-    const getUser = useUserSession();
+async function Text() {
 
-    useEffect(() => {
-        setUser(getUser);
-    }, []);
 
-    if (!user) {
-        return <p>Loading...</p>;
-    }
+    const user = getUserSession();
 
     return (
         <>
             <p>
-                {user.profile.name}
+                {user?.profile.name}
             </p>
         </>
     );
