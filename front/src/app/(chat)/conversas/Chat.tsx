@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 "use client"
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { AvatarFallback, AvatarImage, Avatar } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
@@ -8,6 +9,8 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { type Session, type Profile } from "~/types/session";
 import io, { type Socket } from 'socket.io-client'
 import { useUserSession } from "~/utils/clientSession";
+import { Message } from "~/types/message";
+import MessageComponent from "./MessageComponent";
 
 let socket:Socket;
 
@@ -15,16 +18,19 @@ interface UserCardProps {
     profile: Profile | undefined
 }
 
+// Profile é o user que foi aberto o chat
 function Chat({ profile }:UserCardProps) {
 
 
+    const chatMessageRef = useRef<HTMLDivElement | null>(null);
+
     const [user, setUser] = useState<Session | null>(null);
     const [text, setText] = useState<string>('');
-    const getUser = useUserSession();
+    const [messages, setMessages] = useState<Message[]>([]);
+    const getUser = useUserSession(); // Pega dados do usuário logado
 
     useEffect(() => {
         setUser(getUser);
-        console.log(getUser?.profile.id)
         socket = io(`http://localhost:3001`, {
             query: { clientId: getUser?.profile.id, clientToken: getUser?.token },
         });
@@ -37,16 +43,42 @@ function Chat({ profile }:UserCardProps) {
             console.log('Received message:', message);
         });
 
-        // console.log(profile);
+        const fetchMessages = async () => {
+            try {
+                const response = await fetch(`http://localhost:3001/messages/chat/${getUser?.profile.id}/${profile?.id}`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getUser?.token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json() as Message[];
+                console.log(data)
+                setMessages(data);
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        };
+
+        fetchMessages().then(() => {}).catch(() => {});
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile])
+
+    useEffect(() => {
+        if (chatMessageRef.current) {
+          chatMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [messages])
 
     function send():void {
         // if(profile?.id.trim() == '' || text.trim() == ''){
         //   return;
         // }
     
-        socket.emit('message', { to: profile?.id, message: text })    
+        socket.emit('message', { to: profile?.id, message: text }) 
         setText('');
     }
 
@@ -75,11 +107,15 @@ function Chat({ profile }:UserCardProps) {
                 </Avatar>
                 <p>{profile.name}</p>
             </div>
-            <div>
-                <ScrollArea>
-
-                </ScrollArea>
-            </div>
+            <ScrollArea className="h-full w-full p-4">
+                {messages.map((e:Message, index:number) => {
+                return (
+                    <div key={index} ref={index === messages.length - 1 ? chatMessageRef : null}>
+                        <MessageComponent user={user} message={e}/>
+                    </div>
+                )
+                })}
+            </ScrollArea>
             <div className="w-full h-16 text-white flex gap-4 items-center justify-start p-4">
                 <Input placeholder="Digite sua mensagem" value={text} onChange={(e) => setText(e.target.value)} className="text-black"/>
                 <Button onClick={() => {send()}}>Enviar</Button>
