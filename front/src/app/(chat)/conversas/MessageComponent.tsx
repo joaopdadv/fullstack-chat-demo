@@ -16,12 +16,12 @@ function MessageComponent({user, message}:MessageCardProps) {
           message.senderId == user?.profile.id ?
           <div className="w-full flex items-center justify-between mb-2">
             <div></div>
-            <div className="bg-green-300 p-4 rounded w-max max-w-96">
+            <div className="bg-green-300 p-4 rounded w-max max-w-xl">
                 {message.message}
             </div>
           </div>
           :
-          <div className="bg-gray-300 p-4 rounded w-max max-w-96 mb-2">
+          <div className="bg-gray-300 p-4 rounded w-max max-w-xl mb-2">
             {message.message}
           </div>
         }

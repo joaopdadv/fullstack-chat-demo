@@ -111,7 +111,7 @@ function Chat({ profile }:UserCardProps) {
     }
 
     return (
-        <div className="flex flex-col items-center justify-between h-full w-full">
+        <div className="flex flex-col items-center justify-between h-full w-full bg-gray-500">
             <div  className="w-full h-16 bg-gray-600 text-white flex gap-4 items-center justify-start p-4">
             <Sheet>
                 <SheetTrigger>
