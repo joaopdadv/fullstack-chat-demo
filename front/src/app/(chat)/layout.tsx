@@ -15,10 +15,8 @@ export default function RootLayout({
 }) {
 
   return (
-    <html lang="pt-br" className={`${GeistSans.variable}`}>
-        <body className="box-border h-screen">   
-          {children}
-        </body>
-    </html>
+    <div className="box-border h-screen">   
+      {children}
+    </div>
   );
 }

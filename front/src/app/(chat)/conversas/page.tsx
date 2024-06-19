@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client"
 
@@ -6,7 +7,7 @@
 import Chat from "./Chat";
 import { useEffect, useState } from "react";
 import { useUserSession } from "~/utils/clientSession";
-import { type Session } from "~/types/session";
+import { type Profile, type Session } from "~/types/session";
 import {
     ResizableHandle,
     ResizablePanel,
@@ -17,43 +18,37 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "~/components/ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 
-interface Profile{
-    name:string,
-    picture:string,
-    id:string
-}
-
 function ConversasPage() {
     
     const [user, setUser] = useState<Session | null>(null);
-    const [id, setId] = useState<string>('');
+    const [selectedProfile, setSelectedProfile] = useState<Profile | undefined>(undefined);
     const [profileList, setProfileList] = useState<Profile[]>([]);
     const getUser = useUserSession();
 
     useEffect(() => {
         setUser(getUser);
-        setProfileList([
-            {
-                name: "João",
-                picture: "",
-                id: "1"
-            },
-            {
-                name: "Pedro",
-                picture: "",
-                id: "2"
-            },
-            {
-                name: "Arthur",
-                picture: "",
-                id: "3"
-            },
-            {
-                name: "Belga",
-                picture: "",
-                id: "4"
-            },
-        ])
+        
+        const fetchUser = async () => {
+            try {
+                const response = await fetch('http://localhost:3001/user', {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getUser?.token}`
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const data = await response.json();
+                console.log(data);
+                setProfileList(data as Profile[])
+            } catch (error) {
+                console.error('Fetch error:', error);
+            }
+        };
+
+        fetchUser().then(() => {}).catch(() => {});
+
         // console.log(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -72,7 +67,7 @@ function ConversasPage() {
                                     profileList.map((e, index) => {
                                         
                                         return(
-                                            <div key={index}>
+                                            <div key={index} onClick={() => setSelectedProfile(e)}>
                                                 <UserCard profile={e}/>
                                             </div>
                                         )
@@ -82,7 +77,7 @@ function ConversasPage() {
                     </ResizablePanel>
                     <ResizableHandle/>
                     <ResizablePanel minSize={65} defaultSize={80}>
-                        <Chat id={id}/>
+                        <Chat profile={selectedProfile}/>
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </div>
