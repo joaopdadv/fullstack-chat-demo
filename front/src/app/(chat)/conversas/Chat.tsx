@@ -39,8 +39,8 @@ function Chat({ profile }:UserCardProps) {
             console.log('Connected to websocket');
         });
 
-        socket.on('message', (message) => {
-            console.log('Received message:', message);
+        socket.on('message', (message:Message) => {
+            setMessages((prevMessages) => [...prevMessages, message]);
         });
 
         const fetchMessages = async () => {
@@ -78,7 +78,13 @@ function Chat({ profile }:UserCardProps) {
         //   return;
         // }
     
-        socket.emit('message', { to: profile?.id, message: text }) 
+        if(!user || !profile){return;}
+
+        socket.emit('message', { to: profile?.id, message: text })
+
+        const newMessage = new Message("", new Date, text, user.profile.id, profile.id);
+        setMessages((prevMessages) => [...prevMessages, newMessage]);
+
         setText('');
     }
 
