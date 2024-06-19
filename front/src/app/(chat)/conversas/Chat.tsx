@@ -11,6 +11,14 @@ import io, { type Socket } from 'socket.io-client'
 import { useUserSession } from "~/utils/clientSession";
 import { Message } from "~/types/message";
 import MessageComponent from "./MessageComponent";
+import {
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+    SheetTrigger,
+  } from "~/components/ui/sheet"
 
 let socket:Socket;
 
@@ -74,11 +82,9 @@ function Chat({ profile }:UserCardProps) {
     }, [messages])
 
     function send():void {
-        // if(profile?.id.trim() == '' || text.trim() == ''){
-        //   return;
-        // }
-    
-        if(!user || !profile){return;}
+        if(!user || !profile || text.trim() == ''){
+          return;
+        }
 
         socket.emit('message', { to: profile?.id, message: text })
 
@@ -106,13 +112,23 @@ function Chat({ profile }:UserCardProps) {
 
     return (
         <div className="flex flex-col items-center justify-between h-full w-full">
-            <div className="w-full h-16 bg-gray-600 text-white flex gap-4 items-center justify-start p-4">
-                <Avatar>
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{profile.name.at(0)}</AvatarFallback>
-                </Avatar>
-                <p>{profile.name}</p>
+            <div  className="w-full h-16 bg-gray-600 text-white flex gap-4 items-center justify-start p-4">
+            <Sheet>
+                <SheetTrigger>
+                    <div className="w-full h-16 flex gap-4 items-center justify-start p-4">
+                        <Avatar>
+                            <AvatarImage src="" />
+                            <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{profile.name.at(0)}</AvatarFallback>
+                        </Avatar>
+                        <p className="hover:underline">{profile.name}</p>
+                    </div>
+                </SheetTrigger>
+                <SheetContent>
+                    Conteúdo do menu lateral
+                </SheetContent>
+            </Sheet>
             </div>
+
             <ScrollArea className="h-full w-full p-4">
                 {messages.map((e:Message, index:number) => {
                 return (
@@ -126,6 +142,7 @@ function Chat({ profile }:UserCardProps) {
                 <Input placeholder="Digite sua mensagem" value={text} onChange={(e) => setText(e.target.value)} className="text-black"/>
                 <Button onClick={() => {send()}}>Enviar</Button>
             </div>
+
         </div>
     );
 }

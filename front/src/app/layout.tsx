@@ -1,6 +1,7 @@
 import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
+import { Toaster } from "~/components/ui/sonner";
 
 export const metadata = {
   title: "Chat Demo",
@@ -18,6 +19,7 @@ export default function RootLayout({
     <html lang="pt-br" className={`${GeistSans.variable}`}>
         <body>
           {children}
+          <Toaster />
         </body>
     </html>
   );
