@@ -15,8 +15,8 @@ export default function RootLayout({
 }) {
 
   return (
-    <div className="box-border h-screen">   
+    <main className="box-border h-screen">   
       {children}
-    </div>
+    </main>
   );
 }

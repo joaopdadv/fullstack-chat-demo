@@ -7,7 +7,7 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { type Session, type Profile } from "~/types/session";
-import io, { type Socket } from 'socket.io-client'
+// import io, { type Socket } from 'socket.io-client'
 import { useUserSession } from "~/utils/clientSession";
 import { Message } from "~/types/message";
 import MessageComponent from "./MessageComponent";
@@ -19,15 +19,17 @@ import {
     SheetTitle,
     SheetTrigger,
   } from "~/components/ui/sheet"
+import { type Socket } from "socket.io-client";
 
-let socket:Socket;
+// let socket:Socket;
 
-interface UserCardProps {
-    profile: Profile | undefined
+interface ChatProps {
+    profile: Profile | undefined,
+    socket: Socket
 }
 
 // Profile é o user que foi aberto o chat
-function Chat({ profile }:UserCardProps) {
+function Chat({ profile, socket }:ChatProps) {
 
 
     const chatMessageRef = useRef<HTMLDivElement | null>(null);
@@ -39,17 +41,12 @@ function Chat({ profile }:UserCardProps) {
 
     useEffect(() => {
         setUser(getUser);
-        socket = io(`http://localhost:3001`, {
-            query: { clientId: getUser?.profile.id, clientToken: getUser?.token },
-        });
 
-        socket.on('connect', () => {
-            console.log('Connected to websocket');
-        });
-
-        socket.on('message', (message:Message) => {
-            setMessages((prevMessages) => [...prevMessages, message]);
-        });
+        if(socket){
+            socket.on('message', (message:Message) => {
+                setMessages((prevMessages) => [...prevMessages, message]);
+            });
+        }
 
         const fetchMessages = async () => {
             try {
@@ -70,19 +67,21 @@ function Chat({ profile }:UserCardProps) {
             }
         };
 
-        fetchMessages().then(() => {}).catch(() => {});
+        if(profile){
+            fetchMessages().then(() => {}).catch(() => {});
+        }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile])
 
     useEffect(() => {
         if (chatMessageRef.current) {
-          chatMessageRef.current.scrollIntoView({ behavior: 'smooth' });
+          chatMessageRef.current.scrollIntoView({ behavior: 'instant' });
         }
     }, [messages])
 
     function send():void {
-        if(!user || !profile || text.trim() == ''){
+        if(!user || !profile || !socket || text.trim() == ''){
           return;
         }
 
@@ -97,7 +96,7 @@ function Chat({ profile }:UserCardProps) {
     if(!user){
         return (
             <div className="flex items-center justify-center h-full w-full">
-                <p className="text-gray-500">Erro ao carregar user.</p>
+                <p className="text-gray-600">Erro ao carregar user.</p>
             </div>
         )
     }
@@ -105,7 +104,7 @@ function Chat({ profile }:UserCardProps) {
     if(!profile){
         return (
             <div className="flex items-center justify-center h-full w-full">
-                <p className="text-gray-500">Nenhuma conversa selecionada.</p>
+                <p className="text-gray-600">Nenhuma conversa selecionada.</p>
             </div>
         )
     }

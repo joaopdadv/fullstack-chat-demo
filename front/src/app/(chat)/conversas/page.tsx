@@ -18,6 +18,9 @@ import { ScrollArea } from "~/components/ui/scroll-area";
 import { Avatar, AvatarImage } from "~/components/ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { IoSettingsOutline } from "react-icons/io5";
+import io, { type Socket } from 'socket.io-client'
+let socket:Socket;
+
 
 function ConversasPage() {
     
@@ -29,7 +32,19 @@ function ConversasPage() {
     useEffect(() => {
         setUser(getUser);
         
-        const fetchUser = async () => {
+        socket = io(`http://localhost:3001`, {
+            query: { clientId: getUser?.profile.id, clientToken: getUser?.token },
+        });
+
+        socket.on('connect', () => {
+            console.log('Connected to websocket');
+        });
+
+        socket.on('typing', () => {
+            console.log('Digitando...');
+        });
+
+        const fetchUsers = async () => {
             try {
                 const response = await fetch('http://localhost:3001/user', {
                     headers: {
@@ -47,8 +62,11 @@ function ConversasPage() {
             }
         };
 
-        fetchUser().then(() => {}).catch(() => {});
+        fetchUsers().then(() => {}).catch(() => {});
 
+        return (()=> {
+            socket.disconnect();
+        })
         // console.log(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
@@ -88,7 +106,7 @@ function ConversasPage() {
                     </ResizablePanel>
                     <ResizableHandle/>
                     <ResizablePanel minSize={65} defaultSize={80}>
-                        <Chat profile={selectedProfile}/>
+                        <Chat profile={selectedProfile} socket={socket}/>
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </div>
