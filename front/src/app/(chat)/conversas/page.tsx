@@ -19,6 +19,7 @@ import { Avatar, AvatarImage } from "~/components/ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { IoSettingsOutline } from "react-icons/io5";
 import io, { type Socket } from 'socket.io-client'
+import { typing } from "~/types/typing";
 let socket:Socket;
 
 
@@ -41,8 +42,7 @@ function ConversasPage() {
             console.log('Connected to websocket');
         });
 
-        socket.on('typing', (data:JSON) => {
-            console.log('Digitando...', data);
+        socket.on('typing', (data:typing) => {
             setTyping(data.typing)
         });
 
