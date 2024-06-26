@@ -25,11 +25,12 @@ import { type Socket } from "socket.io-client";
 
 interface ChatProps {
     profile: Profile | undefined,
-    socket: Socket
+    socket: Socket,
+    typing: boolean
 }
 
 // Profile é o user que foi aberto o chat
-function Chat({ profile, socket }:ChatProps) {
+function Chat({ profile, socket, typing }:ChatProps) {
 
 
     const chatMessageRef = useRef<HTMLDivElement | null>(null);
@@ -71,6 +72,11 @@ function Chat({ profile, socket }:ChatProps) {
             fetchMessages().then(() => {}).catch(() => {});
         }
 
+        return(() => {
+            if(socket){
+                socket.emit('typing', { to: profile?.id, typing: false });
+            }
+        })
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [profile])
 
@@ -85,13 +91,26 @@ function Chat({ profile, socket }:ChatProps) {
           return;
         }
 
-        socket.emit('message', { to: profile?.id, message: text })
+        socket.emit('message', { to: profile?.id, message: text, sensible: true })
 
         const newMessage = new Message("", new Date, text, user.profile.id, profile.id);
         setMessages((prevMessages) => [...prevMessages, newMessage]);
 
         setText('');
     }
+
+    useEffect(() => {
+        if(!socket){return}
+
+        if(text == ''){
+            socket.emit('typing', { to: profile?.id, typing: false });
+            return;
+        }
+
+        if(text.length == 1){
+            socket.emit('typing', { to: profile?.id, typing: true });
+        }
+    }, [text])
 
     if(!user){
         return (
@@ -119,7 +138,12 @@ function Chat({ profile, socket }:ChatProps) {
                             <AvatarImage src="" />
                             <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{profile.name.at(0)}</AvatarFallback>
                         </Avatar>
-                        <p className="hover:underline">{profile.name}</p>
+                        <div className="text-left">
+                            <p className="hover:underline">{profile.name}</p>
+                            {
+                                typing ? <p className="text-gray-400 font-bold">Digitando...</p> : <p></p>
+                            }
+                        </div>
                     </div>
                 </SheetTrigger>
                 <SheetContent>
@@ -138,7 +162,12 @@ function Chat({ profile, socket }:ChatProps) {
                 })}
             </ScrollArea>
             <div className="w-full h-16 text-white flex gap-4 items-center justify-start p-4">
-                <Input placeholder="Digite sua mensagem" value={text} onChange={(e) => setText(e.target.value)} className="text-black"/>
+                <Input 
+                    placeholder="Digite sua mensagem" 
+                    value={text} 
+                    onChange={(e) => setText(e.target.value)}
+                    className="text-black"
+                />
                 <Button onClick={() => {send()}}>Enviar</Button>
             </div>
 

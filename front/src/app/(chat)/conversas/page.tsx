@@ -7,7 +7,7 @@
 import Chat from "./Chat";
 import { useEffect, useState } from "react";
 import { useUserSession } from "~/utils/clientSession";
-import { type Profile, type Session } from "~/types/session";
+import { type Contact, type Profile, type Session } from "~/types/session";
 import {
     ResizableHandle,
     ResizablePanel,
@@ -25,8 +25,9 @@ let socket:Socket;
 function ConversasPage() {
     
     const [user, setUser] = useState<Session | null>(null);
-    const [selectedProfile, setSelectedProfile] = useState<Profile | undefined>(undefined);
-    const [profileList, setProfileList] = useState<Profile[]>([]);
+    const [selectedProfile, setSelectedProfile] = useState<Contact | undefined>(undefined);
+    const [profileList, setProfileList] = useState<Contact[]>([]);
+    const [typing, setTyping] = useState<boolean>(false);
     const getUser = useUserSession();
 
     useEffect(() => {
@@ -40,8 +41,9 @@ function ConversasPage() {
             console.log('Connected to websocket');
         });
 
-        socket.on('typing', () => {
-            console.log('Digitando...');
+        socket.on('typing', (data:JSON) => {
+            console.log('Digitando...', data);
+            setTyping(data.typing)
         });
 
         const fetchUsers = async () => {
@@ -55,7 +57,8 @@ function ConversasPage() {
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
-                const data = await response.json() as Profile[];
+                const data = await response.json() as Contact[];
+                console.log(data);
                 setProfileList(data)
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -97,7 +100,7 @@ function ConversasPage() {
                                         
                                         return(
                                             <div key={index} onClick={() => setSelectedProfile(e)}>
-                                                <UserCard profile={e}/>
+                                                <UserCard profile={e.profile} lastMessage={e.lastMessage}/>
                                             </div>
                                         )
                                     })}
@@ -106,7 +109,7 @@ function ConversasPage() {
                     </ResizablePanel>
                     <ResizableHandle/>
                     <ResizablePanel minSize={65} defaultSize={80}>
-                        <Chat profile={selectedProfile} socket={socket}/>
+                        <Chat profile={selectedProfile?.profile} socket={socket} typing={typing}/>
                     </ResizablePanel>
                 </ResizablePanelGroup>
             </div>
@@ -114,11 +117,7 @@ function ConversasPage() {
     );
 }
 
-interface UserCardProps {
-    profile: Profile
-}
-
-function UserCard({profile}:UserCardProps){
+function UserCard({profile, lastMessage}:Contact){
 
     return(
         <div className="flex align-top justify-items-start gap-4 bg-gray-600 p-4 mb-2 rounded text-white cursor-pointer">
@@ -126,7 +125,14 @@ function UserCard({profile}:UserCardProps){
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{profile.name.at(0)}</AvatarFallback>
             </Avatar>
-            {profile.name}
+            <div>
+                <p>
+                    {profile.name}
+                </p>
+                <p className="text-gray-400">
+                    {lastMessage}
+                </p>
+            </div>
         </div>
     )
 }
