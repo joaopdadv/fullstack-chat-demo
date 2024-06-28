@@ -5,9 +5,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import Chat from "./Chat";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useUserSession } from "~/utils/clientSession";
-import { type Contact, type Profile, type Session } from "~/types/session";
+import { type Contact, type Session } from "~/types/session";
 import {
     ResizableHandle,
     ResizablePanel,
@@ -19,7 +19,8 @@ import { Avatar, AvatarImage } from "~/components/ui/avatar";
 import { AvatarFallback } from "@radix-ui/react-avatar";
 import { IoSettingsOutline } from "react-icons/io5";
 import io, { type Socket } from 'socket.io-client'
-import { typing } from "~/types/typing";
+import { type typing } from "~/types/typing";
+import { type Message } from "~/types/message";
 let socket:Socket;
 
 
@@ -29,6 +30,7 @@ function ConversasPage() {
     const [selectedProfile, setSelectedProfile] = useState<Contact | undefined>(undefined);
     const [profileList, setProfileList] = useState<Contact[]>([]);
     const [typing, setTyping] = useState<boolean>(false);
+    const profileListRef = useRef<Contact[]>(profileList);
     const getUser = useUserSession();
 
     useEffect(() => {
@@ -46,6 +48,11 @@ function ConversasPage() {
             setTyping(data.typing)
         });
 
+        socket.on('message', (message:Message) => {
+            updateLastMessage(message);
+            // console.log(message, profileListRef.current);
+        });
+
         const fetchUsers = async () => {
             try {
                 const response = await fetch('http://localhost:3001/user', {
@@ -58,8 +65,9 @@ function ConversasPage() {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json() as Contact[];
-                console.log(data);
+                // console.log(data);
                 setProfileList(data)
+                profileListRef.current = data;
             } catch (error) {
                 console.error('Fetch error:', error);
             }
@@ -73,6 +81,31 @@ function ConversasPage() {
         // console.log(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    function updateLastMessage(message:Message) {
+        console.log(message);
+
+        if(profileListRef.current.length == 0){
+            return
+        }
+
+        const updatedProfileArray = profileListRef.current.map((e) => {
+            if(e.profile.id === message.senderId) {
+                return {
+                    ...e,
+                    lastMessage: message.message
+                };
+            }
+            return e;
+        });
+
+        setProfileList(updatedProfileArray);
+        profileListRef.current = updatedProfileArray;
+    }
+
+    useEffect(() => {
+        console.log(profileListRef.current);
+    }, [profileList]);
 
     return (
         <div className="bg-gray-200 w-full h-full p-6 flex items-center justify-between">

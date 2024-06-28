@@ -14,12 +14,10 @@ import MessageComponent from "./MessageComponent";
 import {
     Sheet,
     SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
     SheetTrigger,
   } from "~/components/ui/sheet"
 import { type Socket } from "socket.io-client";
+import { Status } from "~/enums/statusEnum";
 
 // let socket:Socket;
 
@@ -47,6 +45,8 @@ function Chat({ profile, socket, typing }:ChatProps) {
             socket.on('message', (message:Message) => {
                 setMessages((prevMessages) => [...prevMessages, message]);
             });
+
+            socket.emit('visualized', { to: profile?.id });
         }
 
         const fetchMessages = async () => {
@@ -61,7 +61,6 @@ function Chat({ profile, socket, typing }:ChatProps) {
                     throw new Error('Network response was not ok');
                 }
                 const data = await response.json() as Message[];
-                console.log(data)
                 setMessages(data);
             } catch (error) {
                 console.error('Fetch error:', error);
@@ -91,9 +90,9 @@ function Chat({ profile, socket, typing }:ChatProps) {
           return;
         }
 
-        socket.emit('message', { to: profile?.id, message: text, sensible: true })
+        socket.emit('message', { to: profile?.id, message: text, sensible: false })
 
-        const newMessage = new Message("", new Date, text, user.profile.id, profile.id);
+        const newMessage = new Message("", new Date, text, user.profile.id, profile.id, Status.NOT_RECEIVED);
         setMessages((prevMessages) => [...prevMessages, newMessage]);
 
         setText('');
