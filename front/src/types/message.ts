@@ -10,3 +10,8 @@ export class Message{
         public visualized:Status,
     ){}
 }
+
+export interface Visualized{
+    from: string,
+    visualized:Status
+}

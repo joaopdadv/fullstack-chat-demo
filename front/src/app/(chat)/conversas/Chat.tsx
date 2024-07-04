@@ -7,9 +7,8 @@ import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { type Session, type Profile } from "~/types/session";
-// import io, { type Socket } from 'socket.io-client'
 import { useUserSession } from "~/utils/clientSession";
-import { Message } from "~/types/message";
+import { Message, Visualized } from "~/types/message";
 import MessageComponent from "./MessageComponent";
 import {
     Sheet,
@@ -46,7 +45,17 @@ function Chat({ profile, socket, typing }:ChatProps) {
                 setMessages((prevMessages) => [...prevMessages, message]);
             });
 
-            socket.emit('visualized', { to: profile?.id });
+            socket.emit('visualized', { to: profile?.id, visualized: 2});
+
+            socket.on('visualized', (data:Visualized) => {
+                console.log(data);
+                messages.map((e) => {
+                    if((e.visualized == Status.RECEIVED || e.visualized == Status.SEEN) && e.id == user?.profile.id){
+                        return {...e, visualized: data.visualized}
+                    }
+                    return e;
+                });
+            })
         }
 
         const fetchMessages = async () => {
