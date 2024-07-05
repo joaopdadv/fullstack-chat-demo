@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-empty-function */
 "use client"
 
 import { useEffect, useRef, useState } from "react";
@@ -29,7 +28,6 @@ interface ChatProps {
 // Profile é o user que foi aberto o chat
 function Chat({ profile, socket, typing }:ChatProps) {
 
-
     const chatMessageRef = useRef<HTMLDivElement | null>(null);
 
     const [user, setUser] = useState<Session | null>(null);
@@ -43,19 +41,27 @@ function Chat({ profile, socket, typing }:ChatProps) {
         if(socket){
             socket.on('message', (message:Message) => {
                 setMessages((prevMessages) => [...prevMessages, message]);
+                socket.emit('visualized', { to: profile?.id, visualized: 2});
             });
 
             socket.emit('visualized', { to: profile?.id, visualized: 2});
 
             socket.on('visualized', (data:Visualized) => {
                 console.log(data);
-                messages.map((e) => {
-                    if((e.visualized == Status.RECEIVED || e.visualized == Status.SEEN) && e.id == user?.profile.id){
-                        return {...e, visualized: data.visualized}
-                    }
-                    return e;
-                });
-            })
+
+                setMessages((prevMessages) =>
+                    prevMessages.map((e) => {
+                        if(e.visualized == Status.NOT_RECEIVED && e.senderId == user?.profile.id){
+                            console.log(e);
+                            return {...e, visualized: data.visualized}
+                        }
+                        if(e.visualized == Status.RECEIVED && e.senderId == user?.profile.id){
+                            return {...e, visualized: data.visualized}
+                        }
+                        return e;
+                    })
+                );
+            });
         }
 
         const fetchMessages = async () => {
@@ -77,6 +83,7 @@ function Chat({ profile, socket, typing }:ChatProps) {
         };
 
         if(profile){
+            // eslint-disable-next-line @typescript-eslint/no-empty-function
             fetchMessages().then(() => {}).catch(() => {});
         }
 

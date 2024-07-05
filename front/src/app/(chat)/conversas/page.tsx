@@ -50,7 +50,6 @@ function ConversasPage() {
 
         socket.on('message', (message:Message) => {
             updateLastMessage(message);
-            // console.log(message, profileListRef.current);
         });
 
         const fetchUsers = async () => {
@@ -101,6 +100,7 @@ function ConversasPage() {
 
         setProfileList(updatedProfileArray);
         profileListRef.current = updatedProfileArray;
+        socket.emit('visualized', { to: message.senderId, visualized: 1});
     }
 
     useEffect(() => {
