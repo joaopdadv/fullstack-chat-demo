@@ -1,0 +1,68 @@
+services:
+  chat_db:
+    image: postgres:latest
+    container_name: chat_db
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - 5555:5432
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -d $${POSTGRES_DB} -U $${POSTGRES_USER}" ]
+      interval: 5s
+    networks:
+      - chat_network
+
+  chat_back:
+    container_name: chat_back
+    build:
+      context: ./back
+      target: server
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    command: pnpm run dev
+    ports:
+      - 3001:3001
+    depends_on:
+      migration_db:
+        condition: service_completed_successfully
+    networks:
+      - chat_network
+
+  chat_front:
+    container_name: chat_front
+    build:
+      context: ./front
+      dockerfile: Dockerfile
+    command: npm run dev
+    environment:
+      - SERVER_API_URL=http://chat_back:3001
+      - PUBLIC_API_URL=http://localhost:3001
+    ports:
+      - 3000:3000
+    depends_on:
+      - chat_db
+      - chat_back
+    networks:
+      - chat_network
+
+  migration_db:
+    container_name: migration_db
+    build:
+      context: ./back
+      target: base
+    env_file:
+      - .env
+    command: pnpx prisma migrate dev --name init
+    depends_on:
+        chat_db:
+          condition: service_healthy
+    networks:
+      - chat_network
+
+networks:
+  chat_network:
+    driver: bridge

@@ -66,7 +66,7 @@ function Chat({ profile, socket, typing }:ChatProps) {
 
         const fetchMessages = async () => {
             try {
-                const response = await fetch(`http://localhost:3001/messages/chat/${getUser?.profile.id}/${profile?.id}`, {
+                const response = await fetch(`${process.env.PUBLIC_API_URL}/messages/chat/${getUser?.profile.id}/${profile?.id}`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${getUser?.token}`

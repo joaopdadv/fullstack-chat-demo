@@ -36,7 +36,7 @@ function ConversasPage() {
     useEffect(() => {
         setUser(getUser);
         
-        socket = io(`http://localhost:3001`, {
+        socket = io(`${process.env.PUBLIC_API_URL}`, {
             query: { clientId: getUser?.profile.id, clientToken: getUser?.token },
         });
 
@@ -54,7 +54,7 @@ function ConversasPage() {
 
         const fetchUsers = async () => {
             try {
-                const response = await fetch('http://localhost:3001/user', {
+                const response = await fetch(`${process.env.PUBLIC_API_URL}/user`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${getUser?.token}`
