@@ -1,7 +1,5 @@
 import "~/styles/globals.css";
 
-import { GeistSans } from "geist/font/sans";
-
 export const metadata = {
   title: "Conversas",
   description: "Demo de chat usando next.js e nest.js",

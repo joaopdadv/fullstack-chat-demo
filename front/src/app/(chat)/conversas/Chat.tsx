@@ -114,6 +114,12 @@ function Chat({ profile, socket, typing }:ChatProps) {
         setText('');
     }
 
+    const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+        if (event.key === 'Enter') {
+          send();
+        }
+    };
+
     useEffect(() => {
         if(!socket){return}
 
@@ -181,6 +187,7 @@ function Chat({ profile, socket, typing }:ChatProps) {
                     placeholder="Digite sua mensagem" 
                     value={text} 
                     onChange={(e) => setText(e.target.value)}
+                    onKeyDown={handleKeyDown}
                     className="text-black"
                 />
                 <Button onClick={() => {send()}}>Enviar</Button>
