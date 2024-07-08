@@ -21,10 +21,14 @@ import { IoSettingsOutline } from "react-icons/io5";
 import io, { type Socket } from 'socket.io-client'
 import { type typing } from "~/types/typing";
 import { type Message } from "~/types/message";
+import { MdOutlineExitToApp } from "react-icons/md";
+import { useLogout } from "~/utils/logout";
 let socket:Socket;
 
 
 function ConversasPage() {
+
+    const logout = useLogout();
     
     const [user, setUser] = useState<Session | null>(null);
     const [selectedProfile, setSelectedProfile] = useState<Contact | undefined>(undefined);
@@ -110,14 +114,15 @@ function ConversasPage() {
     return (
         <div className="bg-gray-200 w-full h-full p-6 flex items-center justify-between">
             <div className="bg-gray-600 h-full w-16 flex flex-col items-center justify-between rounded-l-xl p-4 text-white">
-                <div>
+                <div className="flex flex-col gap-4">
+                    <MdOutlineExitToApp color="white" size={25} onClick={logout} className="cursor-pointer"/>
                     <IoSettingsOutline color="white" size={25}/>
                 </div>
                 <div>
-                <Avatar>
-                    <AvatarImage src="" />
-                    <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{user?.profile.name.at(0)}</AvatarFallback>
-                </Avatar>
+                    <Avatar>
+                        <AvatarImage src="" />
+                        <AvatarFallback className="bg-green-500 w-full h-full flex items-center justify-center">{user?.profile.name.at(0)}</AvatarFallback>
+                    </Avatar>
                 </div>
             </div>
             <div className="bg-gray-500 h-full w-full rounded-r-xl overflow-hidden">

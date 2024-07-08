@@ -56,7 +56,7 @@ services:
       target: base
     env_file:
       - .env
-    command: pnpx prisma migrate dev --name init
+    command: pnpx prisma migrate deploy
     depends_on:
         chat_db:
           condition: service_healthy
